@@ -2,5 +2,4 @@ linux/venv
 linux/build
 linux/dist
 linux/deb_build
-linux/*.spec
-linux/*.deb
+
