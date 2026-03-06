@@ -1,0 +1,17 @@
+# AutoTyper Application Requirements
+
+# Backend
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pymongo>=4.6.0
+pyjwt>=2.8.0
+pydantic[email]>=2.5.0
+
+# Desktop App
+pyperclip>=1.8.2
+pynput>=1.7.6
+requests>=2.31.0
+firebase-admin>=6.4.0  # For clipboard sync with Android
+
+# For building exe
+pyinstaller>=6.0.0
