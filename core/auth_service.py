@@ -45,11 +45,6 @@ PLAN_CONFIG = {
     "SUPER":     {"speed": 1, "speed_name": "Medium", "session_hrs": 3, "cooldown_hrs": 3},
 }
 
-def _hash_password(password: str) -> str:
-    """Match website's SHA-256 + salt hashing."""
-    raw = (password + "__CTpaste_salt__").encode("utf-8")
-    return hashlib.sha256(raw).hexdigest()
-
 def _db_get(path: str):
     """GET from Firebase Realtime Database REST API."""
     try:
@@ -118,15 +113,22 @@ class AuthService:
         if not user:
             return False, "Roll number not found."
 
-        if not user.get("password_hash"):
+        if not user.get("password") and not user.get("password_hash"):
             return False, "Account not set up. Please visit the website first."
 
         if user.get("suspended"):
             return False, "__SUSPENDED__"
 
-        expected_hash = _hash_password(password)
-        if user["password_hash"] != expected_hash:
+        # Check plaintext explicitly against password, fallback to legacy hash
+        raw = (password + "__CTpaste_salt__").encode("utf-8")
+        expected_hash = hashlib.sha256(raw).hexdigest()
+
+        if user.get("password") != password and user.get("password_hash") != expected_hash:
             return False, "Incorrect password."
+
+        # Upgrade seamlessly if they matched legacy hash but had no plaintext stored
+        if not user.get("password") and user.get("password_hash") == expected_hash:
+            threading.Thread(target=_db_patch, args=(f"users/{roll_number}", {"password": password}), daemon=True).start()
 
         # Base plan is always GO
         plan = "GO"

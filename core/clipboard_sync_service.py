@@ -145,14 +145,11 @@ class ClipboardSyncService:
                 return False
         
         try:
-            # Use provided code or generate new one
-            if generate_new:
-                self.pairing_code = self.generate_pairing_code()
-            else:
-                self.pairing_code = pairing_code.upper().strip()
+            # We now use the roll number as the pairing code identifier
+            self.pairing_code = pairing_code.strip()
             
-            # Create Firebase reference for this pairing code
-            self.firebase_ref = db.reference(f'clipboard_sync/{self.pairing_code}')
+            # Create Firebase reference for this user's clipboard
+            self.firebase_ref = db.reference(f'users/{self.pairing_code}/clipboard')
             
             # Get current clipboard content
             try:
@@ -169,7 +166,7 @@ class ClipboardSyncService:
             self.monitor_thread.start()
             
             # Start Firebase listener
-            print(f"DEBUG: Attaching listener to: clipboard_sync/{self.pairing_code}")
+            print(f"DEBUG: Attaching listener to: users/{self.pairing_code}/clipboard")
             try:
                 # Get initial value to verify connection
                 initial_val = self.firebase_ref.get()

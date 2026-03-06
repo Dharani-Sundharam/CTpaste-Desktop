@@ -649,9 +649,9 @@ class MainWindow(QMainWindow):
         sync_layout.addWidget(sync_title)
 
         code_row = QHBoxLayout()
-        self.pairing_code_label = QLabel("Not connected")
+        self.pairing_code_label = QLabel("Auto-syncing to your account")
         self.pairing_code_label.setFont(QFont("Segoe UI", 10))
-        self.pairing_code_label.setStyleSheet("color: #8a8a9a;")
+        self.pairing_code_label.setStyleSheet("color: #8b949e;")
         code_row.addWidget(self.pairing_code_label)
         code_row.addStretch()
         self.sync_status_dot = QLabel("●")
@@ -665,7 +665,7 @@ class MainWindow(QMainWindow):
         self.sync_event_label.setStyleSheet("color: #6a6a8a;")
         sync_layout.addWidget(self.sync_event_label)
 
-        self.sync_btn = QPushButton("Connect Phone")
+        self.sync_btn = QPushButton("Toggle Sync")
         self.sync_btn.setFont(QFont("Segoe UI", 9, QFont.Weight.Bold))
         self.sync_btn.setMinimumHeight(32)
         self.sync_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -883,18 +883,18 @@ class MainWindow(QMainWindow):
         clipboard_sync.on_error = on_error
     
     def toggle_phone_sync(self):
-        """Toggle phone sync on/off"""
+        """Toggle phone sync on/off using Roll Number"""
         if clipboard_sync.is_running:
             # Stop sync
             clipboard_sync.stop_sync()
-            self.sync_btn.setText("🔗 Sync with Phone")
+            self.sync_btn.setText("🔗 Enable Phone Sync")
         else:
-            # Start sync with new pairing code
-            if clipboard_sync.start_sync("", generate_new=True):
-                code = clipboard_sync.pairing_code
-                self.sync_btn.setText("🔌 Disconnect")
-                self.pairing_code_label.setText(f"Code: {code}")
-                self.pairing_code_label.setStyleSheet("color: #51cf66; font-weight: bold; font-size: 16px;")
+            # Start sync using Roll Number instead of generating a code
+            roll = auth_service.current_user.get('roll_number') if auth_service.current_user else ""
+            if roll and clipboard_sync.start_sync(roll, generate_new=False):
+                self.sync_btn.setText("🔌 Disconnect Sync")
+                self.pairing_code_label.setText("Syncing Android clipboard")
+                self.pairing_code_label.setStyleSheet("color: #51cf66; font-weight: bold; font-size: 14px;")
             else:
                 self.pairing_code_label.setText("Failed to start sync")
                 self.pairing_code_label.setStyleSheet("color: #ff6b6b;")
@@ -903,14 +903,12 @@ class MainWindow(QMainWindow):
         """Update sync status display"""
         if is_connected:
             self.sync_status_dot.setStyleSheet("color: #51cf66;")
-            if "Code:" in status:
-                code = status.split("Code: ")[1]
-                self.pairing_code_label.setText(f"Code: {code}")
-                self.pairing_code_label.setStyleSheet("color: #51cf66; font-weight: bold; font-size: 15px;")
+            self.pairing_code_label.setText("Sync active")
+            self.pairing_code_label.setStyleSheet("color: #51cf66; font-weight: bold; font-size: 14px;")
         else:
             self.sync_status_dot.setStyleSheet("color: #ff6b6b;")
-            self.pairing_code_label.setText("Not connected")
-            self.pairing_code_label.setStyleSheet("color: #8a8a9a; font-size: 10px;")
+            self.pairing_code_label.setText("Sync paused")
+            self.pairing_code_label.setStyleSheet("color: #8a8a9a; font-size: 13px;")
             self.sync_event_label.setText("")
     
     def update_sync_event(self, message):
@@ -969,7 +967,16 @@ def start_app():
             app = QApplication(sys.argv)
 
         from PyQt6.QtGui import QIcon
-        icon_path = os.path.join(os.path.dirname(__file__), "assets", "icon.ico")
+        
+        # Proper PyInstaller icon resolution
+        if getattr(sys, 'frozen', False):
+            # If the application is run as a bundle
+            base_path = sys._MEIPASS
+        else:
+            # If run from Python directly
+            base_path = os.path.dirname(__file__)
+            
+        icon_path = os.path.join(base_path, "icon.ico")
         if os.path.exists(icon_path):
             app.setWindowIcon(QIcon(icon_path))
 
