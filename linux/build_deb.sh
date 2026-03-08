@@ -83,7 +83,13 @@ fi
 python3 -m venv venv
 source venv/bin/activate
 pip install --quiet --upgrade pip
-pip install --quiet pyperclip pynput requests PyQt6 pyinstaller
+pip install --quiet \
+    pyperclip \
+    pynput \
+    requests \
+    PyQt6 \
+    pymongo \
+    pyinstaller
 echo -e "      ${GREEN}✓ Virtual environment ready${NC}"
 echo ""
 
@@ -94,6 +100,16 @@ pyinstaller \
     --windowed \
     --name ctpaste \
     --add-data "firebase_config.json:." \
+    --hidden-import=PyQt6 \
+    --hidden-import=PyQt6.QtWidgets \
+    --hidden-import=PyQt6.QtCore \
+    --hidden-import=PyQt6.QtGui \
+    --hidden-import=pymongo \
+    --hidden-import=pynput \
+    --hidden-import=pynput.keyboard \
+    --hidden-import=pynput.mouse \
+    --hidden-import=pyperclip \
+    --hidden-import=requests \
     main.py
 
 if [ ! -f "$DIST_DIR/ctpaste" ]; then
