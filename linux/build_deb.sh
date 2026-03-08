@@ -83,7 +83,7 @@ fi
 python3 -m venv venv
 source venv/bin/activate
 pip install --quiet --upgrade pip
-pip install --quiet pyperclip pynput requests pyinstaller
+pip install --quiet pyperclip pynput requests PyQt6 pyinstaller
 echo -e "      ${GREEN}✓ Virtual environment ready${NC}"
 echo ""
 
