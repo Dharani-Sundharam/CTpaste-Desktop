@@ -100,11 +100,8 @@ pyinstaller \
     --windowed \
     --name ctpaste \
     --add-data "firebase_config.json:." \
-    --hidden-import=PyQt6 \
-    --hidden-import=PyQt6.QtWidgets \
-    --hidden-import=PyQt6.QtCore \
-    --hidden-import=PyQt6.QtGui \
-    --hidden-import=pymongo \
+    --collect-all PyQt6 \
+    --collect-all pymongo \
     --hidden-import=pynput \
     --hidden-import=pynput.keyboard \
     --hidden-import=pynput.mouse \
@@ -128,6 +125,7 @@ echo -e "[ ${YELLOW}5/6${NC} ] Creating .deb package..."
 # Clean old build
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR/opt/ctpaste"
+mkdir -p "$BUILD_DIR/usr/bin"
 mkdir -p "$BUILD_DIR/usr/share/applications"
 mkdir -p "$BUILD_DIR/DEBIAN"
 
@@ -147,10 +145,14 @@ Description: CTpaste - Automated clipboard typing tool
  Requires an active session from the CTpaste website.
 EOF
 
+# Create /usr/bin symlink so `ctpaste` works in terminal
+ln -sf /opt/ctpaste/ctpaste "$BUILD_DIR/usr/bin/ctpaste"
+
 # Postinst script to set permissions
 cat > "$BUILD_DIR/DEBIAN/postinst" << EOF
 #!/bin/bash
 chmod +x /opt/ctpaste/ctpaste
+ln -sf /opt/ctpaste/ctpaste /usr/local/bin/ctpaste 2>/dev/null || true
 EOF
 chmod +x "$BUILD_DIR/DEBIAN/postinst"
 
