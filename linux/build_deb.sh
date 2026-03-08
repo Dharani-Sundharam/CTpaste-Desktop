@@ -48,8 +48,28 @@ echo ""
 
 # ── Step 2: Install system dependencies ──────────────
 echo -e "[ ${YELLOW}2/6${NC} ] Installing system dependencies..."
+
+# Remove cdrom source if present (common on fresh VM installs, breaks apt)
+sudo sed -i '/^deb cdrom:/d' /etc/apt/sources.list 2>/dev/null || true
+
+# Enable universe repo (needed for xdotool, upx etc.)
+sudo add-apt-repository -y universe 2>/dev/null || true
+
 sudo apt-get update -q
-sudo apt-get install -y -q python3 python3-pip python3-venv upx-ucl binutils xdotool
+
+# Install packages (with fallback for upx)
+sudo apt-get install -y -q python3 python3-pip python3-venv binutils xdotool || {
+    echo -e "      ${YELLOW}Trying alternative pip install via get-pip.py...${NC}"
+    sudo apt-get install -y -q python3 binutils xdotool curl
+    curl -fsSL https://bootstrap.pypa.io/get-pip.py | sudo python3
+    sudo apt-get install -y -q python3-venv || python3 -m pip install virtualenv
+}
+
+# Install upx (optional, just for compression — skip if missing)
+sudo apt-get install -y -q upx-ucl 2>/dev/null || \
+sudo apt-get install -y -q upx 2>/dev/null || \
+echo -e "      ${YELLOW}⚠ UPX not found — binary won't be compressed but will still work${NC}"
+
 echo -e "      ${GREEN}✓ System dependencies installed${NC}"
 echo ""
 
