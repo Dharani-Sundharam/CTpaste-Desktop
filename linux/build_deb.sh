@@ -138,7 +138,7 @@ Package: ctpaste
 Version: 1.0
 Architecture: amd64
 Maintainer: CTpaste <support@ctpaste.com>
-Depends: xdotool
+Depends: xdotool, libxcb-cursor0, libgl1, libxcb-xinerama0
 Description: CTpaste - Automated clipboard typing tool
  CTpaste lets you paste code into any application by
  simulating keystrokes, bypassing paste restrictions.
