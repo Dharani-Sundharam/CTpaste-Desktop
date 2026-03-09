@@ -87,7 +87,7 @@ pip install --quiet \
     pyperclip \
     pynput \
     requests \
-    PyQt6 \
+    "PyQt6==6.4.2" \
     pymongo \
     pyinstaller
 echo -e "      ${GREEN}✓ Virtual environment ready${NC}"
