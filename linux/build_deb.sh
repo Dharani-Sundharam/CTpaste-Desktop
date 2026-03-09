@@ -95,7 +95,7 @@ echo ""
 
 # ── Step 4: Build binary with PyInstaller ────────────
 echo -e "[ ${YELLOW}4/6${NC} ] Building binary with PyInstaller..."
-pyinstaller \
+pyi-makespec \
     --onefile \
     --windowed \
     --name ctpaste \
@@ -108,6 +108,19 @@ pyinstaller \
     --hidden-import=pyperclip \
     --hidden-import=requests \
     main.py
+
+# Patch the spec file to exclude conflicting system libraries and schemas
+python3 -c "
+with open('ctpaste.spec', 'r') as f: lines = f.readlines()
+with open('ctpaste.spec', 'w') as f:
+    for line in lines:
+        if 'pyz = PYZ' in line:
+            f.write('a.binaries = [x for x in a.binaries if not x[0].startswith(\"libstdc++.so\") and not x[0].startswith(\"libgcc_s.so\")]\n')
+            f.write('a.datas = [x for x in a.datas if \"glib-2.0/schemas\" not in x[0]]\n')
+        f.write(line)
+"
+
+pyinstaller --clean ctpaste.spec
 
 if [ ! -f "$DIST_DIR/ctpaste" ]; then
     echo -e "${RED}✗ Build failed — ctpaste binary not found in dist/${NC}"

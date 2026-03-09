@@ -7,6 +7,14 @@ import sys
 import os
 import threading
 
+if sys.platform == "linux":
+    # Disable GTK platform theme to prevent PyQt6 from loading host's libproxy/GTK3
+    # which causes libstdc++.so.6 version conflicts and GObject schema core dumps
+    os.environ["QT_QPA_PLATFORMTHEME"] = "generic"
+    os.environ.pop("XDG_CURRENT_DESKTOP", None)
+    os.environ.pop("DESKTOP_SESSION", None)
+    os.environ.pop("GNOME_DESKTOP_SESSION_ID", None)
+
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QFrame, QProgressBar, QRadioButton, QButtonGroup,
