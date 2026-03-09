@@ -9,6 +9,7 @@ import threading
 import time
 import sys
 from urllib import request, error
+from typing import Tuple, Optional
 
 # ── Firebase config ─────────────────────────────────
 def _get_firebase_url():
@@ -101,7 +102,7 @@ class AuthService:
         self.on_addons_changed = None  # callback(new_addons_dict)
 
     # ── Login / Logout ────────────────────────────────
-    def login(self, roll_number: str, password: str) -> tuple[bool, str]:
+    def login(self, roll_number: str, password: str) -> Tuple[bool, str]:
         """
         Verify credentials against Firebase.
         Returns (success: bool, message: str)
